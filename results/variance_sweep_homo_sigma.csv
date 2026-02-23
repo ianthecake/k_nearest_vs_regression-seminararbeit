@@ -1,0 +1,6 @@
+sweep,mode,noise_type,param,n_runs,best_k_mean,best_k_std,min_mse_true_mean,min_mse_true_std
+sine_1d_homo_sigma,homo,homo,0.05,30,11.57,2.47,0.00039,7.4e-05
+sine_1d_homo_sigma,homo,homo,0.1,30,16.73,3.55,0.000951,0.00022
+sine_1d_homo_sigma,homo,homo,0.2,30,25.67,5.04,0.002373,0.000553
+sine_1d_homo_sigma,homo,homo,0.4,30,37.33,9.8,0.006259,0.001716
+sine_1d_homo_sigma,homo,homo,0.8,30,52.33,10.06,0.016229,0.005122

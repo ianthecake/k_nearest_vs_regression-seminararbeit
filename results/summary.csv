@@ -1,0 +1,5 @@
+experiment,n_runs,best_k_mean,best_k_std,min_mse_true_mean,min_mse_true_std,mse_noisy_mean,mse_noisy_std
+linear_sum_10d_hetero_radial,30,9.67,2.4,0.162606,0.014769,0.299481,0.017078
+piecewise_1d_hetero_linear,30,27.33,9.07,0.008348,0.001913,0.101787,0.004056
+product_sine_5d_homo,30,11.5,2.33,0.009603,0.000965,0.031824,0.001304
+sine_1d_homo,30,25.67,5.04,0.002373,0.000553,0.042706,0.001095

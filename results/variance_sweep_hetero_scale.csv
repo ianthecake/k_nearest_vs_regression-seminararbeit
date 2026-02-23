@@ -1,0 +1,5 @@
+sweep,mode,noise_type,param,n_runs,best_k_mean,best_k_std,min_mse_true_mean,min_mse_true_std
+piecewise_1d_hetero_linear_scale,hetero_scale,hetero_linear,0.5,30,14.37,6.49,0.004342,0.001016
+piecewise_1d_hetero_linear_scale,hetero_scale,hetero_linear,1.0,30,27.33,9.07,0.008348,0.001913
+piecewise_1d_hetero_linear_scale,hetero_scale,hetero_linear,2.0,30,56.67,19.88,0.015093,0.002783
+piecewise_1d_hetero_linear_scale,hetero_scale,hetero_linear,4.0,30,85.67,23.73,0.02692,0.005821
