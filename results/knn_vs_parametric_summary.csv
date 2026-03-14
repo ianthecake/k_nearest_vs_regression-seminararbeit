@@ -1,0 +1,5 @@
+experiment,n_runs_knn,best_k_mean,best_k_std,min_mse_true_mean_knn,min_mse_true_std_knn,mse_noisy_mean_knn,mse_noisy_std_knn,winner_knn_vs_param,n_runs_param,best_degree_mean,best_degree_std,min_mse_true_mean_param,min_mse_true_std_param,mse_noisy_mean_param,mse_noisy_std_param,mse_gap_param_minus_knn
+linear_sum_10d_hetero_radial,30,9.67,2.4,0.162606,0.014769,0.299481,0.017078,parametric,30,1.0,0.0,0.002647,0.001289,0.137021,0.00493,-0.159959
+piecewise_1d_hetero_linear,30,27.33,9.07,0.008348,0.001913,0.101787,0.004056,kNN,30,3.0,0.0,0.035818,0.001298,0.128728,0.003633,0.02747
+product_sine_5d_homo,30,11.5,2.33,0.009603,0.000965,0.031824,0.001304,parametric,30,2.0,0.0,0.008874,0.00054,0.031281,0.001247,-0.000729
+sine_1d_homo,30,25.67,5.04,0.002373,0.000553,0.042706,0.001095,kNN,30,3.0,0.0,0.004683,0.000231,0.044851,0.001078,0.00231

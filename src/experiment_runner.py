@@ -8,6 +8,7 @@ import pandas as pd
 
 from .data_generation import DatasetConfig, generate_dataset, MEAN_FUNCTIONS, NOISE_FN_TYPE
 from .knn_evaluation import evaluate_knn_over_k, summarize_best_k
+from .regression_evaluation import evaluate_parametric_regressions, summarize_best_parametric_model
 
 
 def run_multiple_seeds(
@@ -57,6 +58,49 @@ def run_multiple_seeds(
     curves_true = np.array(curves_true, dtype=float)
     return df_runs, curves_true
 
+def run_multiple_seeds_parametric(
+    experiment_name: str,
+    base_cfg: DatasetConfig,
+    seeds: List[int],
+    polynomial_degrees: List[int] | None = None,
+) -> pd.DataFrame:
+    """
+    Runs linear + polynomial regression baselines over multiple seeds.
+
+    For each seed:
+      - generate dataset
+      - fit/evaluate linear regression
+      - fit/evaluate polynomial regression for given degrees
+      - store the best parametric model by mse_vs_true_mean
+
+    Returns:
+      df_runs: one row per seed
+    """
+    rows = []
+
+    for seed in seeds:
+        cfg = replace(base_cfg, seed=seed)
+        data = generate_dataset(cfg)
+
+        res = evaluate_parametric_regressions(
+            data=data,
+            polynomial_degrees=polynomial_degrees,
+        )
+        best = summarize_best_parametric_model(res)
+
+        rows.append(
+            {
+                "experiment": experiment_name,
+                "seed": seed,
+                "best_model": best["best_model"],
+                "best_degree": best["best_degree"],
+                "min_mse_vs_true": best["min_mse_vs_true"],
+                "mse_vs_noisy_at_best_model": best["mse_vs_noisy_at_best_model"],
+            }
+        )
+
+    return pd.DataFrame(rows)
+
 
 def summarize_across_seeds(df_runs: pd.DataFrame) -> pd.DataFrame:
     """
@@ -84,6 +128,30 @@ def summarize_across_seeds(df_runs: pd.DataFrame) -> pd.DataFrame:
 
     return out
 
+def summarize_parametric_across_seeds(df_runs: pd.DataFrame) -> pd.DataFrame:
+    """
+    Aggregates mean/std across seeds for linear/polynomial baselines.
+    """
+    out = (
+        df_runs.groupby("experiment")
+        .agg(
+            n_runs=("seed", "count"),
+            best_degree_mean=("best_degree", "mean"),
+            best_degree_std=("best_degree", "std"),
+            min_mse_true_mean=("min_mse_vs_true", "mean"),
+            min_mse_true_std=("min_mse_vs_true", "std"),
+            mse_noisy_mean=("mse_vs_noisy_at_best_model", "mean"),
+            mse_noisy_std=("mse_vs_noisy_at_best_model", "std"),
+        )
+        .reset_index()
+    )
+
+    out["best_degree_mean"] = out["best_degree_mean"].round(2)
+    out["best_degree_std"] = out["best_degree_std"].round(2)
+    for c in ["min_mse_true_mean", "min_mse_true_std", "mse_noisy_mean", "mse_noisy_std"]:
+        out[c] = out[c].round(6)
+
+    return out
 
 def save_outputs(
     df_runs: pd.DataFrame,
@@ -104,6 +172,48 @@ def save_outputs(
         k_values=np.array(k_values, dtype=int),
         **{name: arr for name, arr in curves_by_experiment.items()},
     )
+
+def save_parametric_outputs(
+    df_runs: pd.DataFrame,
+    df_summary: pd.DataFrame,
+    out_dir: str = "results",
+    prefix: str = "parametric",
+) -> None:
+    Path(out_dir).mkdir(parents=True, exist_ok=True)
+    df_runs.to_csv(Path(out_dir) / f"{prefix}_runs.csv", index=False)
+    df_summary.to_csv(Path(out_dir) / f"{prefix}_summary.csv", index=False)
+
+
+
+def build_model_comparison_table(
+    df_knn_summary: pd.DataFrame,
+    df_param_summary: pd.DataFrame,
+) -> pd.DataFrame:
+    """
+    Creates one comparison table per experiment.
+    """
+    knn = df_knn_summary.copy()
+    knn["winner_knn_vs_param"] = ""
+
+    merged = knn.merge(
+        df_param_summary,
+        on="experiment",
+        suffixes=("_knn", "_param"),
+    )
+
+    merged["winner_knn_vs_param"] = np.where(
+        merged["min_mse_true_mean_knn"] <= merged["min_mse_true_mean_param"],
+        "kNN",
+        "parametric",
+    )
+
+    merged["mse_gap_param_minus_knn"] = (
+        merged["min_mse_true_mean_param"] - merged["min_mse_true_mean_knn"]
+    ).round(6)
+
+    return merged
+
+
 
 class OnlineMeanVariance:
     """
